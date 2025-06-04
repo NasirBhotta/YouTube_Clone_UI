@@ -73,7 +73,10 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: () {
                 // Navigate to profile
               },
-              child: const CircleAvatar(radius: 14),
+              child: const CircleAvatar(
+                radius: 14,
+                child: Icon(Icons.account_circle, color: Colors.white),
+              ),
             ),
           ),
         ],

@@ -55,7 +55,10 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
             padding: const EdgeInsets.only(right: 16, left: 8),
             child: GestureDetector(
               onTap: () {},
-              child: const CircleAvatar(radius: 14),
+              child: const CircleAvatar(
+                radius: 14,
+                child: Icon(Icons.account_circle, color: Colors.white),
+              ),
             ),
           ),
         ],
@@ -144,7 +147,10 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                           ),
                           child: Row(
                             children: const [
-                              Text('Videos'),
+                              Text(
+                                'Videos',
+                                style: TextStyle(color: Colors.black),
+                              ),
                               SizedBox(width: 4),
                               Icon(Icons.arrow_drop_down, size: 16),
                             ],

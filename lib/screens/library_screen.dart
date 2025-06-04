@@ -4,15 +4,26 @@ import 'package:youtube_clone/models/video_model.dart';
 import 'package:youtube_clone/utils/dummy_data.dart';
 import 'package:youtube_clone/widgets/history_video_item.dart';
 
-class LibraryScreen extends StatelessWidget {
+class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final List<VideoModel> history = DummyData.videos.take(5).toList();
-    final List<VideoModel> likedVideos =
-        DummyData.videos.skip(5).take(3).toList();
+  State<LibraryScreen> createState() => _LibraryScreenState();
+}
 
+class _LibraryScreenState extends State<LibraryScreen> {
+  List<VideoModel> history = [];
+  final List<VideoModel> likedVideos =
+      DummyData.videos.skip(5).take(3).toList();
+  @override
+  void initState() {
+    super.initState();
+    history = DummyData.videos.take(5).toList();
+    print(history);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Library'),
@@ -29,7 +40,7 @@ class LibraryScreen extends StatelessWidget {
               onTap: () {},
               child: const CircleAvatar(
                 radius: 14,
-                backgroundColor: Colors.grey,
+                child: Icon(Icons.account_circle, color: Colors.white),
               ),
             ),
           ),
@@ -65,7 +76,6 @@ class LibraryScreen extends StatelessWidget {
                 },
               ),
             ),
-
             const Divider(height: 1),
 
             // Your videos section

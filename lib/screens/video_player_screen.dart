@@ -342,7 +342,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 12.0),
-              color: Colors.grey[100],
+              // color: Colors.grey[100],
               child: const Center(
                 child: Text(
                   'View all comments',

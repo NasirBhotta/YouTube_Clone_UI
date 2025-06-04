@@ -25,7 +25,6 @@ class _NavigationContainerState extends State<NavigationContainer> {
   ];
 
   void _onItemTapped(int index) {
-    // If upload button is pressed, show bottom sheet instead of navigating
     if (index == 2) {
       _showUploadOptions();
       return;
@@ -94,7 +93,7 @@ class _NavigationContainerState extends State<NavigationContainer> {
         onTap: _onItemTapped,
         selectedItemColor: Colors.red,
         unselectedItemColor: Colors.grey,
-        items: const [
+        items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home),
@@ -112,7 +111,7 @@ class _NavigationContainerState extends State<NavigationContainer> {
           BottomNavigationBarItem(
             icon: Icon(Icons.subscriptions_outlined),
             activeIcon: Icon(Icons.subscriptions),
-            label: 'Subscriptions',
+            label: 'Subs',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.video_library_outlined),

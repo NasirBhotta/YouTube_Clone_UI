@@ -36,21 +36,21 @@ class _ShortsScreenState extends State<ShortsScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Shorts',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Image.asset('assets/images/youtube_shorts.png', height: 60),
-          ],
-        ),
+        // title: Row(
+        //   mainAxisAlignment: MainAxisAlignment.center,
+        //   children: [
+        //     const Text(
+        //       'Shorts',
+        //       style: TextStyle(
+        //         fontSize: 18,
+        //         fontWeight: FontWeight.bold,
+        //         color: Colors.white,
+        //       ),
+        //     ),
+        //     const SizedBox(width: 8),
+        //     Image.asset('assets/images/youtube_shorts.png', height: 60),
+        //   ],
+        // ),
         actions: [
           IconButton(
             icon: const Icon(Icons.search, color: Colors.white),

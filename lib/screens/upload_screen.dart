@@ -235,6 +235,7 @@ class _UploadFormScreenState extends State<UploadFormScreen> {
                         ),
                       ),
                       RadioListTile<bool>(
+                        activeColor: Colors.white,
                         title: const Text('Public'),
                         value: true,
                         groupValue: _isPublic,
@@ -245,6 +246,7 @@ class _UploadFormScreenState extends State<UploadFormScreen> {
                         },
                       ),
                       RadioListTile<bool>(
+                        activeColor: Colors.white,
                         title: const Text('Private'),
                         value: false,
                         groupValue: _isPublic,
@@ -256,6 +258,7 @@ class _UploadFormScreenState extends State<UploadFormScreen> {
                       ),
                       const SizedBox(height: 16),
                       SwitchListTile(
+                        activeColor: Colors.white,
                         title: const Text('Made for kids'),
                         subtitle: const Text(
                           'This setting determines if your video is suitable for children.',

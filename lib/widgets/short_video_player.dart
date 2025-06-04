@@ -169,6 +169,7 @@ class _ShortVideoPlayerState extends State<ShortVideoPlayer> {
                                     size: 14,
                                   ),
                                 ),
+                              SizedBox(width: 10),
                               TextButton(
                                 onPressed: () {},
                                 style: TextButton.styleFrom(
