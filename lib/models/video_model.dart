@@ -5,6 +5,7 @@ class VideoModel {
   final String id;
   final String title;
   final String thumbnailUrl;
+  final String videoURL;
   final String channelName;
   final String channelAvatarUrl;
   final String viewCount;
@@ -17,6 +18,7 @@ class VideoModel {
     required this.id,
     required this.title,
     required this.thumbnailUrl,
+    required this.videoURL,
     required this.channelName,
     required this.channelAvatarUrl,
     required this.viewCount,
@@ -32,6 +34,7 @@ class VideoModel {
       id: json['id'] as String,
       title: json['title'] as String,
       thumbnailUrl: json['thumbnailUrl'] as String,
+      videoURL: json['videoURL'] as String,
       channelName: json['channelName'] as String,
       channelAvatarUrl: json['channelAvatarUrl'] as String,
       viewCount: json['viewCount'] as String,

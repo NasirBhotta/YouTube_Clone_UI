@@ -74,6 +74,8 @@ class DummyData {
       thumbnailUrl: 'https://i.ytimg.com/vi/1ukSR1GRtMU/maxresdefault.jpg',
       channelName: 'Flutter Dev',
       channelAvatarUrl: 'https://randomuser.me/api/portraits/men/1.jpg',
+      videoURL:
+          'https://www.youtube.com/watch?v=v6Rzo5khNE8&ab_channel=Flutter',
       viewCount: '1.2M views',
       uploadTime: '2 weeks ago',
       duration: '12:45',
@@ -86,6 +88,8 @@ class DummyData {
       title: 'Mobile App Development in 2025 - Which Framework to Choose?',
       thumbnailUrl: 'https://i.ytimg.com/vi/1ukSR1GRtMU/maxresdefault.jpg',
       channelName: 'Mobile Dev Hub',
+      videoURL:
+          'https://www.youtube.com/watch?v=v6Rzo5khNE8&ab_channel=Flutter',
       channelAvatarUrl: 'https://randomuser.me/api/portraits/women/2.jpg',
       viewCount: '854K views',
       uploadTime: '3 days ago',
@@ -99,6 +103,8 @@ class DummyData {
       title: 'How to Create a YouTube Clone with Flutter',
       thumbnailUrl: 'https://i.ytimg.com/vi/h-igXZCCrrc/maxresdefault.jpg',
       channelName: 'Code With Mark',
+      videoURL:
+          'https://www.youtube.com/watch?v=v6Rzo5khNE8&ab_channel=Flutter',
       channelAvatarUrl: 'https://randomuser.me/api/portraits/men/3.jpg',
       viewCount: '325K views',
       uploadTime: '1 month ago',
@@ -112,6 +118,8 @@ class DummyData {
       title: 'React Native vs Flutter: The Ultimate Comparison',
       thumbnailUrl: 'https://i.ytimg.com/vi/X8ipUgXH6jw/maxresdefault.jpg',
       channelName: 'Cross-Platform Chronicles',
+      videoURL:
+          'https://www.youtube.com/watch?v=v6Rzo5khNE8&ab_channel=Flutter',
       channelAvatarUrl: 'https://randomuser.me/api/portraits/women/4.jpg',
       viewCount: '1.5M views',
       uploadTime: '2 months ago',
@@ -125,6 +133,8 @@ class DummyData {
       title: 'Working with YouTube API in Flutter - Complete Guide',
       thumbnailUrl: 'https://i.ytimg.com/vi/1ukSR1GRtMU/maxresdefault.jpg',
       channelName: 'API Builders',
+      videoURL:
+          'https://www.youtube.com/watch?v=v6Rzo5khNE8&ab_channel=Flutter',
       channelAvatarUrl: 'https://randomuser.me/api/portraits/men/5.jpg',
       viewCount: '487K views',
       uploadTime: '3 weeks ago',
@@ -138,6 +148,8 @@ class DummyData {
       title: 'Building Beautiful UIs with Flutter',
       thumbnailUrl: 'https://i.ytimg.com/vi/1ukSR1GRtMU/maxresdefault.jpg',
       channelName: 'Flutter UI Master',
+      videoURL:
+          'https://www.youtube.com/watch?v=v6Rzo5khNE8&ab_channel=Flutter',
       channelAvatarUrl: 'https://randomuser.me/api/portraits/women/6.jpg',
       viewCount: '923K views',
       uploadTime: '1 week ago',
@@ -151,6 +163,8 @@ class DummyData {
       title: 'State Management in Flutter - Provider vs Bloc vs Riverpod',
       thumbnailUrl: 'https://i.ytimg.com/vi/3tm-R7ymwhc/maxresdefault.jpg',
       channelName: 'State Masters',
+      videoURL:
+          'https://www.youtube.com/watch?v=v6Rzo5khNE8&ab_channel=Flutter',
       channelAvatarUrl: 'https://randomuser.me/api/portraits/men/7.jpg',
       viewCount: '756K views',
       uploadTime: '5 days ago',
@@ -164,6 +178,8 @@ class DummyData {
       title: 'Flutter Firebase Integration Tutorial',
       thumbnailUrl: 'https://i.ytimg.com/vi/EXp0gq9kGxI/maxresdefault.jpg',
       channelName: 'Backend Builders',
+      videoURL:
+          'https://www.youtube.com/watch?v=v6Rzo5khNE8&ab_channel=Flutter',
       channelAvatarUrl: 'https://randomuser.me/api/portraits/women/8.jpg',
       viewCount: '612K views',
       uploadTime: '2 weeks ago',

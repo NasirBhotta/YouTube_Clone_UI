@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:youtube_clone/models/video_model.dart';
 import 'package:youtube_clone/utils/dummy_data.dart';
 import 'package:youtube_clone/widgets/video_card.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final VideoModel video;
@@ -18,6 +19,30 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   bool _isLiked = false;
   bool _isDisliked = false;
   bool _isSubscribed = false;
+
+  late YoutubePlayerController _youtubePlayerController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final videoId = YoutubePlayer.convertUrlToId(widget.video.videoURL);
+    _youtubePlayerController = YoutubePlayerController(
+      initialVideoId: videoId ?? '',
+      flags: YoutubePlayerFlags(
+        autoPlay: true,
+        mute: false,
+        controlsVisibleAtStart: true,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    _youtubePlayerController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,64 +78,72 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   Widget _buildVideoPlayer() {
     return AspectRatio(
       aspectRatio: 16 / 9,
-      child: Stack(
-        children: [
-          // In a real app, you would use a video player library here
-          Container(
-            color: Colors.black,
-            child: Center(
-              child: Image.network(
-                widget.video.thumbnailUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-              ),
+      child: YoutubePlayerBuilder(
+        player: YoutubePlayer(
+          controller: _youtubePlayerController,
+          showVideoProgressIndicator: true,
+          progressIndicatorColor: Colors.red,
+        ),
+        builder:
+            (context, player) => Stack(
+              children: [
+                // In a real app, you would use a video player library here
+                // Container(
+                //   color: Colors.black,
+                //   child: Center(
+                //     child: Image.network(
+                //       widget.video.thumbnailUrl,
+                //       fit: BoxFit.cover,
+                //       width: double.infinity,
+                //     ),
+                //   ),
+                // ),
+                // // Video controls overlay
+                // Positioned(
+                //   bottom: 0,
+                //   left: 0,
+                //   right: 0,
+                //   child: Container(
+                //     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                //     decoration: BoxDecoration(
+                //       gradient: LinearGradient(
+                //         begin: Alignment.topCenter,
+                //         end: Alignment.bottomCenter,
+                //         colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
+                //       ),
+                //     ),
+                //     child: Row(
+                //       children: [
+                //         const Icon(Icons.play_arrow, color: Colors.white),
+                //         const SizedBox(width: 8),
+                //         Text(
+                //           '0:00 / ${widget.video.duration}',
+                //           style: const TextStyle(color: Colors.white),
+                //         ),
+                //         const Spacer(),
+                //         const Icon(Icons.fullscreen, color: Colors.white),
+                //       ],
+                //     ),
+                //   ),
+                // ),
+                // // Back button
+                // Positioned(
+                //   top: 16,
+                //   left: 16,
+                //   child: GestureDetector(
+                //     onTap: () => Navigator.pop(context),
+                //     child: Container(
+                //       padding: const EdgeInsets.all(8),
+                //       decoration: BoxDecoration(
+                //         color: Colors.black.withOpacity(0.6),
+                //         shape: BoxShape.circle,
+                //       ),
+                //       child: const Icon(Icons.arrow_back, color: Colors.white),
+                //     ),
+                //   ),
+                // ),
+              ],
             ),
-          ),
-          // Video controls overlay
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.play_arrow, color: Colors.white),
-                  const SizedBox(width: 8),
-                  Text(
-                    '0:00 / ${widget.video.duration}',
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                  const Spacer(),
-                  const Icon(Icons.fullscreen, color: Colors.white),
-                ],
-              ),
-            ),
-          ),
-          // Back button
-          Positioned(
-            top: 16,
-            left: 16,
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.6),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.arrow_back, color: Colors.white),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

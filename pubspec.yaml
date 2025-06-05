@@ -39,6 +39,8 @@ dependencies:
   video_editor: ^3.0.0
   riverpod: ^2.6.1
   flutter_riverpod: ^2.6.1
+  youtube_player_flutter: ^9.1.1
+  youtube_player_iframe: ^5.2.1
 
 dev_dependencies:
   flutter_test:
