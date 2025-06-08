@@ -31,12 +31,18 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedCategoryIndex = 0;
   late List<VideoModel> _videos;
   bool _isLoading = true;
+  bool _isVideoClicked = false;
+  late VideoModel _video;
 
   @override
   void initState() {
     super.initState();
     _loadVideos();
   }
+
+  // void _addVideo(VideoModel video) {
+  //   _video = video;
+  // }
 
   void _loadVideos() async {
     // Simulate network delay
@@ -83,7 +89,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body:
           _isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              )
+              : _isVideoClicked
+              ? Stack(children: [VideoPlayerScreen(video: _video)])
               : Column(
                 children: [
                   // Categories
@@ -133,6 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   // Videos
                   Expanded(
                     child: RefreshIndicator(
+                      color: Colors.white,
                       onRefresh: () async {
                         setState(() {
                           _isLoading = true;
@@ -148,14 +159,19 @@ class _HomeScreenState extends State<HomeScreen> {
                           final video = _videos[index];
                           return GestureDetector(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) =>
-                                          VideoPlayerScreen(video: video),
-                                ),
-                              );
+                              setState(() {
+                                _isVideoClicked = !_isVideoClicked;
+                                _video = video;
+                              });
+
+                              // Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //     builder:
+                              //         (context) =>
+                              //             VideoPlayerScreen(video: video),
+                              //   ),
+                              // );
                             },
                             child: VideoCard(video: video),
                           );

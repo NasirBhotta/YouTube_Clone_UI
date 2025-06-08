@@ -33,6 +33,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         autoPlay: true,
         mute: false,
         controlsVisibleAtStart: true,
+        showLiveFullscreenButton: true,
       ),
     );
   }
@@ -51,7 +52,18 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         child: Column(
           children: [
             // Video player area
-            _buildVideoPlayer(),
+            GestureDetector(
+              onPanStart: (details) {
+                print(details);
+              },
+              onPanDown: (details) {
+                print(details);
+              },
+              onPanUpdate: (details) {
+                print(details.delta);
+              },
+              child: _buildVideoPlayer(),
+            ),
 
             // Video details section
             Expanded(
