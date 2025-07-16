@@ -1,6 +1,6 @@
 // Widget for displaying videos in the history section
 import 'package:flutter/material.dart';
-import 'package:youtube_clone/models/video_model.dart';
+import 'package:youtube_clone/screens/home/models/video_model.dart';
 import 'package:youtube_clone/screens/video_player_screen.dart';
 
 class HistoryVideoItem extends StatelessWidget {

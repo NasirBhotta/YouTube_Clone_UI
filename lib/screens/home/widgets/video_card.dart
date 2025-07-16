@@ -1,6 +1,6 @@
 // Video card widget for YouTube clone app
 import 'package:flutter/material.dart';
-import 'package:youtube_clone/models/video_model.dart';
+import 'package:youtube_clone/screens/home/models/video_model.dart';
 
 class VideoCard extends StatelessWidget {
   final VideoModel video;

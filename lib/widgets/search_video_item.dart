@@ -1,6 +1,6 @@
 // Widget for displaying video search results
 import 'package:flutter/material.dart';
-import 'package:youtube_clone/models/video_model.dart';
+import 'package:youtube_clone/screens/home/models/video_model.dart';
 
 class SearchVideoItem extends StatelessWidget {
   final VideoModel video;

@@ -3,7 +3,7 @@
 
 import 'package:youtube_clone/models/channel_model.dart';
 import 'package:youtube_clone/models/shorts_model.dart';
-import 'package:youtube_clone/models/video_model.dart';
+import 'package:youtube_clone/screens/home/models/video_model.dart';
 
 class DummyData {
   // Sample subscription channels

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:youtube_clone/models/channel_model.dart';
-import 'package:youtube_clone/models/video_model.dart';
+import 'package:youtube_clone/screens/home/models/video_model.dart';
 import 'package:youtube_clone/utils/dummy_data.dart';
-import 'package:youtube_clone/widgets/video_card.dart';
+import 'package:youtube_clone/screens/home/widgets/video_card.dart';
 
 class SubscriptionsScreen extends StatefulWidget {
   const SubscriptionsScreen({super.key});

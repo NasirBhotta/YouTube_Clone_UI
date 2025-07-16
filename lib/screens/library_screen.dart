@@ -1,6 +1,6 @@
 // Library screen showing saved videos and playlists
 import 'package:flutter/material.dart';
-import 'package:youtube_clone/models/video_model.dart';
+import 'package:youtube_clone/screens/home/models/video_model.dart';
 import 'package:youtube_clone/utils/dummy_data.dart';
 import 'package:youtube_clone/widgets/history_video_item.dart';
 

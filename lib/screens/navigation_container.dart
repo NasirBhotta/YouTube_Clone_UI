@@ -1,6 +1,6 @@
 // Main navigation container that handles the bottom navigation
 import 'package:flutter/material.dart';
-import 'package:youtube_clone/screens/home_screen.dart';
+import 'package:youtube_clone/screens/home/UI/home_screen.dart';
 import 'package:youtube_clone/screens/library_screen.dart';
 import 'package:youtube_clone/screens/shorts_screen.dart';
 import 'package:youtube_clone/screens/subscriptions_screen.dart';
