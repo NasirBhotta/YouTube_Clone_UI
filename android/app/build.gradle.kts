@@ -1,9 +1,10 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id("dev.flutter.flutter-gradle-plugin")
+    id("dev.flutter.flutter-gradle-plugin") // Must come after android and kotlin
+    id("com.google.gms.google-services")    // Firebase plugin always last
 }
+
 
 android {
     namespace = "com.example.youtube_clone"

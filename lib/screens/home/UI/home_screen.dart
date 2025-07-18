@@ -59,13 +59,11 @@ class _HomeScreenState extends State<HomeScreen> {
         _scrollController.position.maxScrollExtent - 200) {
       final bloc = context.read<VideoBloc>();
       final state = bloc.state;
-      print(_scrollController.position.pixels);
-      print(state is VideoLoaded ? state.hasReachedEnd : "nothing");
+
       if (state is VideoLoaded &&
           !state.isLoadingMore &&
           !state.hasReachedEnd &&
           state.currentCategory == _categories[_selectedCategoryIndex]) {
-        print("loaded");
         bloc.add(FetchVideos(category: _categories[_selectedCategoryIndex]));
       }
     }
@@ -143,6 +141,23 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _refreshVideos() async {
+    final bloc = context.read<VideoBloc>();
+
+    // Add the refresh event
+    bloc.add(
+      FetchVideos(
+        category: _categories[_selectedCategoryIndex],
+        isRefresh: true,
+      ),
+    );
+
+    // Wait for the bloc to complete the refresh
+    await bloc.stream.firstWhere(
+      (state) => state is VideoLoaded || state is VideoError,
+    );
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -217,12 +232,10 @@ class _HomeScreenState extends State<HomeScreen> {
         Padding(
           padding: const EdgeInsets.only(right: 16, left: 8),
           child: GestureDetector(
-            onTap: () {
-              // Navigate to profile
-            },
+            onTap: () {},
             child: const CircleAvatar(
               radius: 14,
-              child: Icon(Icons.account_circle, color: Colors.white),
+              child: Icon(Icons.account_circle, color: Colors.black),
             ),
           ),
         ),
@@ -349,14 +362,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Expanded(
           child: RefreshIndicator(
             color: Colors.red,
-            onRefresh: () async {
-              context.read<VideoBloc>().add(
-                FetchVideos(
-                  category: _categories[_selectedCategoryIndex],
-                  isRefresh: true,
-                ),
-              );
-            },
+            onRefresh: _refreshVideos,
             child:
                 state.videos.isEmpty
                     ? _buildEmptyState()

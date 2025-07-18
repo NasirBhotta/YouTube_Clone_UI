@@ -25,7 +25,7 @@ class ApiService {
         );
       }
 
-      final pageToken = _pageTokens[key];
+      final pageToken = isRefresh ? null : _pageTokens[key];
       Map<String, dynamic> result;
 
       if (category.toLowerCase() == 'all') {
@@ -42,9 +42,12 @@ class ApiService {
       }
 
       final nextPageToken = result['nextPageToken'];
-      if (nextPageToken != null) {
+      if (nextPageToken != null && !isRefresh) {
         _pageTokens['${category.toLowerCase()}_page${page + 1}'] =
             nextPageToken;
+      } else if (nextPageToken != null && isRefresh && page == 1) {
+        // For refresh on page 1, set the token for page 2
+        _pageTokens['${category.toLowerCase()}_page2'] = nextPageToken;
       }
 
       return result['videos'] as List<VideoModel>;
@@ -196,9 +199,5 @@ class ApiService {
     if (h > 0)
       return '$h:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
     return '$m:${s.toString().padLeft(2, '0')}';
-  }
-
-  List<String> getAvailableCategories() {
-    return ['All', 'Flutter', 'Mobile', 'Tutorial', 'API', 'UI'];
   }
 }

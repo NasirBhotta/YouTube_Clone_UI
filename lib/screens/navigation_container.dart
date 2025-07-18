@@ -105,8 +105,22 @@ class _NavigationContainerState extends State<NavigationContainer> {
             label: 'Shorts',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle_outline, size: 40),
-            label: '',
+            icon: SizedBox(
+              height: 50,
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 241, 241, 241),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Icon(Icons.add),
+                ),
+              ),
+            ),
+            label: ' ',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.subscriptions_outlined),

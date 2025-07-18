@@ -82,24 +82,40 @@ class _SearchScreenState extends State<SearchScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: TextField(
-          controller: _searchController,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: 'Search YouTube',
-            border: InputBorder.none,
-            suffixIcon:
-                _searchController.text.isNotEmpty
-                    ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: _clearSearch,
-                    )
-                    : null,
+        title: SizedBox(
+          height: 40,
+          child: TextField(
+            controller: _searchController,
+            autofocus: true,
+            cursorColor: Colors.red,
+            cursorWidth: 1.5,
+            decoration: InputDecoration(
+              contentPadding: EdgeInsets.only(left: 15),
+
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              hintText: 'Search YouTube',
+              border: InputBorder.none,
+              suffixIcon:
+                  _searchController.text.isNotEmpty
+                      ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        style: ButtonStyle(
+                          iconSize: WidgetStatePropertyAll(20),
+                        ),
+                        onPressed: _clearSearch,
+                      )
+                      : null,
+            ),
+            onChanged: (value) {
+              setState(() {}); // Just to update the clear button visibility
+            },
+            onSubmitted: _performSearch,
           ),
-          onChanged: (value) {
-            setState(() {}); // Just to update the clear button visibility
-          },
-          onSubmitted: _performSearch,
         ),
         actions: [
           IconButton(
