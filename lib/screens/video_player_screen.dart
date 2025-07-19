@@ -7,6 +7,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final VideoModel video;
+  final bool? isToggled;
   final GestureDragDownCallback? onPanDown;
   final GestureDragUpdateCallback? onPanUpdate;
   final GestureDragStartCallback? onPanStart;
@@ -19,6 +20,7 @@ class VideoPlayerScreen extends StatefulWidget {
     this.onPanUpdate,
     this.onPanStart,
     this.onPanEnd,
+    this.isToggled,
   });
 
   @override
@@ -30,7 +32,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   bool _isLiked = false;
   bool _isDisliked = false;
   bool _isSubscribed = false;
-  final double _opacity = 0;
+  bool _isDragging = false;
+  double _opacity = 1;
+  double _cumulativeDrag = 0.0;
   double x_axis = 0;
   double y_axix = 0;
 
@@ -62,6 +66,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         // Video player area
         _buildVideoPlayer(),
@@ -69,17 +74,26 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         // Video details section
         Expanded(
           child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildVideoInfo(),
-                _buildActionButtons(),
-                _buildChannelInfo(),
-                _buildDescription(),
-                _buildCommentSection(),
-                _buildRelatedVideos(),
-              ],
-            ),
+            child:
+                _opacity == 0
+                    ? SizedBox.shrink()
+                    : Opacity(
+                      opacity: _opacity,
+                      child: Container(
+                        color: Colors.black,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildVideoInfo(),
+                            _buildActionButtons(),
+                            _buildChannelInfo(),
+                            _buildDescription(),
+                            _buildCommentSection(),
+                            _buildRelatedVideos(),
+                          ],
+                        ),
+                      ),
+                    ),
           ),
         ),
       ],
@@ -87,84 +101,92 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   }
 
   Widget _buildVideoPlayer() {
+    double calculateScale() {
+      if (_cumulativeDrag <= 150) {
+        return 1.0;
+      } else {
+        // Start scaling down after 150px drag
+        // Map drag from 150-450 to scale from 1.0-0.5
+        double dragRange = _cumulativeDrag - 150;
+        double maxDragForScaling = 300; // 150 to 450 = 300px range
+        double scaleReduction = (dragRange / maxDragForScaling).clamp(0.0, 0.5);
+        return (1.0 - scaleReduction).clamp(
+          0.6,
+          1.0,
+        ); // Min scale is 0.5 (half size)
+      }
+    }
+
+    double currentScale = calculateScale();
+    double playerWidth = MediaQuery.of(context).size.width * currentScale;
+    double playerHeight = playerWidth * (9 / 16); // Maintain 16:9 aspect ratio
+    if (widget.isToggled != null) {
+      if (widget.isToggled == true) {
+        print(widget.isToggled);
+      }
+    }
     return GestureDetector(
-      // i am talking from there
-      onPanStart: widget.onPanStart,
+      onPanStart: (details) {
+        widget.onPanStart!(details);
+        setState(() {
+          _isDragging = true;
+        });
+      },
       onPanDown: widget.onPanDown,
       onPanUpdate: (details) {
         widget.onPanUpdate!(details);
 
-        if (details.delta.dy > 0) {}
+        _cumulativeDrag += details.delta.dy;
+
+        _cumulativeDrag = _cumulativeDrag.clamp(-900.0, 900.0);
+
+        double dragForOpacity = _cumulativeDrag.clamp(-100.0, 100.0);
+
+        if (_cumulativeDrag >= 0) {
+          _opacity = 1.0 - (dragForOpacity.abs() / 100.0);
+        } else {
+          _opacity = 1;
+        }
+
+        setState(() {});
       },
-      onPanEnd: widget.onPanEnd,
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: YoutubePlayerBuilder(
-          player: YoutubePlayer(
-            controller: _youtubePlayerController,
-            showVideoProgressIndicator: true,
-            progressIndicatorColor: Colors.red,
-          ),
-          builder:
-              (context, player) => Stack(
-                children: [
-                  // In a real app, you would use a video player library here
-                  // Container(
-                  //   color: Colors.black,
-                  //   child: Center(
-                  //     child: Image.network(
-                  //       widget.video.thumbnailUrl,
-                  //       fit: BoxFit.cover,
-                  //       width: double.infinity,
-                  //     ),
-                  //   ),
-                  // ),
-                  // // Video controls overlay
-                  // Positioned(
-                  //   bottom: 0,
-                  //   left: 0,
-                  //   right: 0,
-                  //   child: Container(
-                  //     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  //     decoration: BoxDecoration(
-                  //       gradient: LinearGradient(
-                  //         begin: Alignment.topCenter,
-                  //         end: Alignment.bottomCenter,
-                  //         colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
-                  //       ),
-                  //     ),
-                  //     child: Row(
-                  //       children: [
-                  //         const Icon(Icons.play_arrow, color: Colors.white),
-                  //         const SizedBox(width: 8),
-                  //         Text(
-                  //           '0:00 / ${widget.video.duration}',
-                  //           style: const TextStyle(color: Colors.white),
-                  //         ),
-                  //         const Spacer(),
-                  //         const Icon(Icons.fullscreen, color: Colors.white),
-                  //       ],
-                  //     ),
-                  //   ),
-                  // ),
-                  // // Back button
-                  // Positioned(
-                  //   top: 16,
-                  //   left: 16,
-                  //   child: GestureDetector(
-                  //     onTap: () => Navigator.pop(context),
-                  //     child: Container(
-                  //       padding: const EdgeInsets.all(8),
-                  //       decoration: BoxDecoration(
-                  //         color: Colors.black.withOpacity(0.6),
-                  //         shape: BoxShape.circle,
-                  //       ),
-                  //       child: const Icon(Icons.arrow_back, color: Colors.white),
-                  //     ),
-                  //   ),
-                  // ),
-                ],
+      onPanEnd: (details) {
+        widget.onPanEnd!(details);
+        if (_cumulativeDrag >= 400) {
+          _cumulativeDrag = 400;
+        } else {
+          setState(() {
+            _isDragging = false;
+            _cumulativeDrag = 0;
+            _opacity = 1;
+          });
+        }
+      },
+      child: SizedBox(
+        width: double.infinity,
+        height: 200, // Fixed height for the video player container
+        child: Stack(
+          children: [
+            Positioned(
+              right: 0, // Position to the right edge
+              bottom: 0, // Position to the bottom edge
+              width: playerWidth, // Half the screen width
+              height: playerHeight, // Maintain 16:9 aspect ratio
+              child: YoutubePlayerBuilder(
+                player: YoutubePlayer(
+                  controller: _youtubePlayerController,
+                  showVideoProgressIndicator: _isDragging ? true : false,
+                  progressIndicatorColor: Colors.red,
+                ),
+                builder:
+                    (context, player) => SizedBox(
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: player,
+                    ),
               ),
+            ),
+          ],
         ),
       ),
     );
@@ -439,8 +461,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   context,
                   MaterialPageRoute(
                     builder:
-                        (context) =>
-                            VideoPlayerScreen(video: relatedVideos[index]),
+                        (context) => VideoPlayerScreen(
+                          video: relatedVideos[index],
+                          isToggled: widget.isToggled,
+                        ),
                   ),
                 );
               },

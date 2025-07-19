@@ -31,23 +31,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   late final ScrollController _scrollController;
   late final AnimationController _videoPlayerAnimationController;
-  late final AnimationController _pipAnimationController;
 
   int _selectedCategoryIndex = 0;
   bool _isVideoPlayerVisible = false;
-  bool _isPipMode = false;
+  final bool _visibillity = false;
+  bool toggled = false;
   late VideoModel _selectedVideo;
 
   // For drag-to-dismiss functionality
   double _dragOffset = 0;
   bool _isDragging = false;
-  static const double _pipThreshold = 200.0;
   static const double _dismissThreshold = 400.0;
-
-  // PiP mode properties
-  Offset _pipPosition = const Offset(20, 100);
-  static const Size _pipSize = Size(120, 68);
-  bool _isDraggingPip = false;
+  static const double _maxDragOffset = 400.0; // Maximum drag offset
 
   @override
   void initState() {
@@ -59,11 +54,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // Initialize animation controllers
     _videoPlayerAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-
-    _pipAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 200),
       vsync: this,
     );
 
@@ -116,7 +106,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     setState(() {
       _selectedVideo = video;
       _isVideoPlayerVisible = true;
-      _isPipMode = false;
       _dragOffset = 0;
       _isDragging = false;
     });
@@ -127,97 +116,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _videoPlayerAnimationController.reverse().then((_) {
       setState(() {
         _isVideoPlayerVisible = false;
-        _isPipMode = false;
-        _dragOffset = 0;
         _isDragging = false;
       });
     });
   }
 
-  void _enterPipMode() {
-    setState(() {
-      _isPipMode = true;
-      _dragOffset = 0;
-      _isDragging = false;
-    });
-    _pipAnimationController.forward();
-  }
-
-  void _exitPipMode() {
-    _pipAnimationController.reverse().then((_) {
-      setState(() {
-        _isPipMode = false;
-        _dragOffset = 0;
-      });
-      _videoPlayerAnimationController.forward();
-    });
-  }
-
   void _onPanStart(DragStartDetails details) {
-    setState(() {
-      _isDragging = true;
-    });
+    // Only allow dragging if dragOffset is <= 440
+    if (_dragOffset <= _maxDragOffset) {
+      setState(() {
+        _isDragging = true;
+      });
+    }
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
-    if (_isPipMode) return;
-
-    if (details.delta.dy > 0) {
+    // Only update drag offset if we're within the allowed range
+    if (_dragOffset <= _maxDragOffset) {
       setState(() {
-        _dragOffset += details.delta.dy;
-        _dragOffset = _dragOffset.clamp(
-          0.0,
-          MediaQuery.of(context).size.height * 0.8,
-        );
+        _dragOffset += (details.delta.dy - 0.1);
+        _dragOffset = _dragOffset.clamp(0.0, _maxDragOffset);
       });
     }
   }
 
   void _onPanEnd(DragEndDetails details) {
-    setState(() {
-      _isDragging = false;
-    });
-
-    if (_dragOffset > _dismissThreshold) {
-      _closeVideoPlayer();
-    } else if (_dragOffset > _pipThreshold) {
-      _enterPipMode();
+    if (_dragOffset >= 400) {
+      // Don't set _isDragging to false when closing to prevent snap-back
+      _dragOffset = 400;
     } else {
       setState(() {
+        _isDragging = false;
         _dragOffset = 0;
       });
     }
   }
 
-  // PiP drag handlers
-  void _onPipPanStart(DragStartDetails details) {
-    setState(() {
-      _isDraggingPip = true;
-    });
-  }
-
-  void _onPipPanUpdate(DragUpdateDetails details) {
-    final screenSize = MediaQuery.of(context).size;
-    final newX = (_pipPosition.dx + details.delta.dx).clamp(
-      0.0,
-      screenSize.width - _pipSize.width,
-    );
-    final newY = (_pipPosition.dy + details.delta.dy).clamp(
-      MediaQuery.of(context).padding.top,
-      screenSize.height -
-          _pipSize.height -
-          MediaQuery.of(context).padding.bottom,
-    );
-
-    setState(() {
-      _pipPosition = Offset(newX, newY);
-    });
-  }
-
-  void _onPipPanEnd(DragEndDetails details) {
-    setState(() {
-      _isDraggingPip = false;
-    });
+  // Method to handle video click when at drag offset 440
+  void _onVideoClick() {
+    if (_dragOffset >= _maxDragOffset) {
+      setState(() {
+        _dragOffset = 0;
+        _isDragging = false;
+        toggled = !toggled;
+      });
+    }
   }
 
   Future<void> _refreshVideos() async {
@@ -237,27 +180,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  double get _contentOpacity {
-    if (!_isVideoPlayerVisible || _isPipMode) return 1.0;
-    if (_dragOffset <= 0) return 0.0;
-
-    // Fade in content as user drags down
-    const fadeStartOffset = 50.0;
-    if (_dragOffset < fadeStartOffset) return 0.0;
-
-    return ((_dragOffset - fadeStartOffset) / 150.0).clamp(0.0, 1.0);
-  }
-
   double get _backgroundOpacity {
-    if (!_isVideoPlayerVisible || _isPipMode) return 0.0;
+    if (!_isVideoPlayerVisible) return 0.0;
     if (_dragOffset <= 0) return 0.0;
 
     // Show white background for small drag amounts
     const maxBackgroundOffset = 200.0;
-    if (_dragOffset <= 100) return 1.0;
+    if (_dragOffset <= 100 && _dragOffset > 0) return 1.0;
 
     if (_dragOffset > maxBackgroundOffset) return 0.0;
-    print(_dragOffset);
+
     return (1.0 - (_dragOffset / maxBackgroundOffset)).clamp(0.0, 1.0);
   }
 
@@ -265,18 +197,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void dispose() {
     _scrollController.dispose();
     _videoPlayerAnimationController.dispose();
-    _pipAnimationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Only show AppBar when video player is not visible or in PiP mode
+      // Only show AppBar when video player is not visible or when dragging
       appBar:
-          (!_isVideoPlayerVisible || _isPipMode || _dragOffset >= 90)
-              ? _buildAppBar()
-              : null,
+          (!_isVideoPlayerVisible || _dragOffset >= 90) ? _buildAppBar() : null,
       body: BlocConsumer<VideoBloc, VideoState>(
         listener: (context, state) {
           // Handle any side effects here if needed
@@ -310,10 +239,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             return Stack(
               children: [
                 // Home content with opacity animation
-                Opacity(
-                  opacity: _contentOpacity,
-                  child: _buildHomeContent(state),
-                ),
+                _buildHomeContent(state),
                 // White background for small drags
                 if (_backgroundOpacity > 0)
                   Opacity(
@@ -321,10 +247,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     child: Container(color: Colors.white),
                   ),
                 // Video player overlay
-                if (_isVideoPlayerVisible && !_isPipMode)
-                  _buildVideoPlayerOverlay(),
-                // PiP player
-                if (_isPipMode) _buildPipPlayer(),
+                if (_isVideoPlayerVisible) _buildVideoPlayerOverlay(),
               ],
             );
           } else if (state is VideoError) {
@@ -369,165 +292,94 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildPipPlayer() {
-    return Positioned(
-      left: _pipPosition.dx,
-      top: _pipPosition.dy,
-      child: GestureDetector(
-        onPanStart: _onPipPanStart,
-        onPanUpdate: _onPipPanUpdate,
-        onPanEnd: _onPipPanEnd,
-        onTap: _exitPipMode,
-        child: AnimatedBuilder(
-          animation: _pipAnimationController,
-          builder: (context, child) {
-            return Transform.scale(
-              scale: 0.3 + (0.7 * _pipAnimationController.value),
-              child: Container(
-                width: _pipSize.width,
-                height: _pipSize.height,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Stack(
-                  children: [
-                    // Mini video player
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Container(
-                        width: double.infinity,
-                        height: double.infinity,
-                        color: Colors.black,
-                        child: const Center(
-                          child: Icon(
-                            Icons.play_arrow,
-                            color: Colors.white,
-                            size: 30,
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Close button
-                    Positioned(
-                      top: 4,
-                      right: 4,
-                      child: GestureDetector(
-                        onTap: _closeVideoPlayer,
-                        child: Container(
-                          width: 20,
-                          height: 20,
-                          decoration: const BoxDecoration(
-                            color: Colors.black54,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.close,
-                            color: Colors.white,
-                            size: 14,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
   Widget _buildVideoPlayerOverlay() {
     return AnimatedBuilder(
       animation: _videoPlayerAnimationController,
       builder: (context, child) {
+        // When closing (drag offset > dismiss threshold), keep the drag offset
+        // to prevent snap-back animation
+        final shouldMaintainDragOffset = _dragOffset > _dismissThreshold;
+
         return Transform.translate(
           offset: Offset(
             0,
-            _isDragging
+            _isDragging || shouldMaintainDragOffset
                 ? _dragOffset
                 : _dragOffset * (1 - _videoPlayerAnimationController.value),
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.black,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 10,
-                  offset: Offset(0, _dragOffset > 0 ? 5 : 0),
-                ),
-              ],
-            ),
-            child: Stack(
-              children: [
-                VideoPlayerScreen(
-                  video: _selectedVideo,
-                  onPanStart: _onPanStart,
-                  onPanUpdate: _onPanUpdate,
-                  onPanEnd: _onPanEnd,
-                ),
-                // Close button
-                Positioned(
-                  top: MediaQuery.of(context).padding.top + 10,
-                  left: 16,
-                  child: GestureDetector(
-                    onTap: _closeVideoPlayer,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.6),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.keyboard_arrow_down,
-                        color: Colors.white,
-                        size: 24,
-                      ),
+          child: Stack(
+            children: [
+              Stack(
+                children: [
+                  // Add GestureDetector to handle video clicks when at max drag offset
+                  GestureDetector(
+                    onTap: _onVideoClick,
+                    child: VideoPlayerScreen(
+                      video: _selectedVideo,
+                      onPanStart: _onPanStart,
+                      onPanUpdate: _onPanUpdate,
+                      onPanEnd: _onPanEnd,
+                      isToggled: toggled,
                     ),
                   ),
-                ),
-                // Drag indicator
-                if (_dragOffset > 0)
+                  // Close button
                   Positioned(
-                    top: MediaQuery.of(context).padding.top + 60,
-                    left: 0,
-                    right: 0,
-                    child: Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          _dragOffset > _dismissThreshold
-                              ? 'Release to close'
-                              : _dragOffset > _pipThreshold
-                              ? 'Release for mini player'
-                              : 'Drag down to minimize',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
+                    top: MediaQuery.of(context).padding.top + 10,
+                    left: 16,
+                    child: GestureDetector(
+                      onTap: _closeVideoPlayer,
+                      child:
+                          _isDragging
+                              ? SizedBox.shrink()
+                              : Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.6),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.keyboard_arrow_down,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                    ),
+                  ),
+                  // Drag indicator
+                  if (_dragOffset > 0)
+                    Positioned(
+                      top: MediaQuery.of(context).padding.top + 60,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.7),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            _dragOffset > _dismissThreshold
+                                ? 'Release to close'
+                                : _dragOffset >= _maxDragOffset
+                                ? 'Tap to expand'
+                                : 'Drag down to minimize',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-              ],
-            ),
+
+                  // Video Detail should be here
+                ],
+              ),
+            ],
           ),
         );
       },
