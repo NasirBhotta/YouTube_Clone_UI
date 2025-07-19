@@ -30,6 +30,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   bool _isLiked = false;
   bool _isDisliked = false;
   bool _isSubscribed = false;
+  final double _opacity = 0;
   double x_axis = 0;
   double y_axix = 0;
 
@@ -60,32 +61,28 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Video player area
-            _buildVideoPlayer(),
+    return Column(
+      children: [
+        // Video player area
+        _buildVideoPlayer(),
 
-            // Video details section
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildVideoInfo(),
-                    _buildActionButtons(),
-                    _buildChannelInfo(),
-                    _buildDescription(),
-                    _buildCommentSection(),
-                    _buildRelatedVideos(),
-                  ],
-                ),
-              ),
+        // Video details section
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildVideoInfo(),
+                _buildActionButtons(),
+                _buildChannelInfo(),
+                _buildDescription(),
+                _buildCommentSection(),
+                _buildRelatedVideos(),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
@@ -94,7 +91,11 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       // i am talking from there
       onPanStart: widget.onPanStart,
       onPanDown: widget.onPanDown,
-      onPanUpdate: widget.onPanUpdate,
+      onPanUpdate: (details) {
+        widget.onPanUpdate!(details);
+
+        if (details.delta.dy > 0) {}
+      },
       onPanEnd: widget.onPanEnd,
       child: AspectRatio(
         aspectRatio: 16 / 9,
