@@ -8,6 +8,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 class VideoPlayerScreen extends StatefulWidget {
   final VideoModel video;
   final bool? isToggled;
+  final bool? isDragging;
   final GestureDragDownCallback? onPanDown;
   final GestureDragUpdateCallback? onPanUpdate;
   final GestureDragStartCallback? onPanStart;
@@ -21,6 +22,7 @@ class VideoPlayerScreen extends StatefulWidget {
     this.onPanStart,
     this.onPanEnd,
     this.isToggled,
+    this.isDragging,
   });
 
   @override
@@ -39,12 +41,18 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   double y_axix = 0;
 
   late YoutubePlayerController _youtubePlayerController;
+  String? _currentVideoId;
 
   @override
   void initState() {
     super.initState();
+    _initializePlayer();
+  }
 
+  void _initializePlayer() {
     final videoId = YoutubePlayer.convertUrlToId(widget.video.videoURL);
+    _currentVideoId = videoId;
+
     _youtubePlayerController = YoutubePlayerController(
       initialVideoId: videoId ?? '',
       flags: YoutubePlayerFlags(
@@ -57,10 +65,37 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   }
 
   @override
-  void dispose() {
-    super.dispose();
+  void didUpdateWidget(VideoPlayerScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
+    // Check if the video has changed
+    if (oldWidget.video.id != widget.video.id) {
+      final newVideoId = YoutubePlayer.convertUrlToId(widget.video.videoURL);
+
+      // Only update if the video ID is actually different
+      if (_currentVideoId != newVideoId) {
+        _currentVideoId = newVideoId;
+
+        // Update the controller with the new video
+        if (newVideoId != null) {
+          _youtubePlayerController.load(newVideoId);
+        }
+
+        // Reset UI state for the new video
+        setState(() {
+          _isDescriptionExpanded = false;
+          _isLiked = false;
+          _isDisliked = false;
+          _isSubscribed = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
     _youtubePlayerController.dispose();
+    super.dispose();
   }
 
   @override
@@ -102,6 +137,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   Widget _buildVideoPlayer() {
     double calculateScale() {
+      // If toggle is false, return minimized scale (half size)
+
+      if (widget.isToggled == true && widget.isDragging == false) {
+        _opacity = 1;
+        return 1;
+      }
+
       if (_cumulativeDrag <= 150) {
         return 1.0;
       } else {
@@ -120,11 +162,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     double currentScale = calculateScale();
     double playerWidth = MediaQuery.of(context).size.width * currentScale;
     double playerHeight = playerWidth * (9 / 16); // Maintain 16:9 aspect ratio
-    if (widget.isToggled != null) {
-      if (widget.isToggled == true) {
-        print(widget.isToggled);
-      }
-    }
+
     return GestureDetector(
       onPanStart: (details) {
         widget.onPanStart!(details);
@@ -168,10 +206,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         child: Stack(
           children: [
             Positioned(
-              right: 0, // Position to the right edge
-              bottom: 0, // Position to the bottom edge
-              width: playerWidth, // Half the screen width
-              height: playerHeight, // Maintain 16:9 aspect ratio
+              // Position to the right edge
+              right: 0,
+              left: null,
+              bottom: 0,
+              width: playerWidth,
+              height: playerHeight,
               child: YoutubePlayerBuilder(
                 player: YoutubePlayer(
                   controller: _youtubePlayerController,
