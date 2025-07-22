@@ -9,6 +9,7 @@ class VideoPlayerScreen extends StatefulWidget {
   final VideoModel video;
   final bool? isToggled;
   final bool? isDragging;
+  final bool? isPiPMode;
   final GestureDragDownCallback? onPanDown;
   final GestureDragUpdateCallback? onPanUpdate;
   final GestureDragStartCallback? onPanStart;
@@ -23,6 +24,7 @@ class VideoPlayerScreen extends StatefulWidget {
     this.onPanEnd,
     this.isToggled,
     this.isDragging,
+    this.isPiPMode,
   });
 
   @override
@@ -138,13 +140,17 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   Widget _buildVideoPlayer() {
     double calculateScale() {
       // If toggle is false, return minimized scale (half size)
+      if (widget.isPiPMode == true) {
+        _opacity = 1;
+        return 0.6; // or 0.6 if you want the same as your clamp's min
+      }
 
       if (widget.isToggled == true && widget.isDragging == false) {
         _opacity = 1;
         return 1;
       }
 
-      if (_cumulativeDrag <= 150) {
+      if (_cumulativeDrag <= 150 && widget.isPiPMode == false) {
         return 1.0;
       } else {
         // Start scaling down after 150px drag

@@ -44,7 +44,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // Video player state
   bool _isVideoPlayerVisible = false;
   bool _toggled = true;
-
+  bool isPiPMode = false;
+  double pipX = 0;
+  double pipY = 0;
   // Drag state - using separate class for better organization
   late final _DragState _dragState;
 
@@ -126,6 +128,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _openVideoPlayer(VideoModel video) {
     setState(() {
       _selectedVideo = video;
+      isPiPMode = false;
       _isVideoPlayerVisible = true;
       _toggled = true;
     });
@@ -146,22 +149,47 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _onPanStart(DragStartDetails details) {
-    if (_dragState.offset <= _maxDragOffset) {
+    if (isPiPMode) {
+      _dragState.setDragging(true);
+    } else if (_dragState.offset <= _maxDragOffset) {
       _dragState.setDragging(true);
       setState(() {});
     }
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
+    if (isPiPMode) {
+      // Get screen dimensions
+      final screenWidth = MediaQuery.of(context).size.width;
+      final screenHeight = MediaQuery.of(context).size.height;
+
+      // Assuming PiP video dimensions (adjust as needed)
+      final pipWidth = screenWidth / 5.5;
+      final pipHeight = screenHeight / 12;
+
+      // Update position with bounds checking
+      pipX += details.delta.dx;
+      pipY += details.delta.dy;
+
+      // Keep PiP video within screen bounds
+      // pipX = pipX.clamp(0 - pipWidth + 50, screenWidth - 50); // Allow partial off-screen
+      // pipY = pipY.clamp(0, screenHeight - pipHeight - 50);
+
+      setState(() {});
+      return;
+    }
+
     if (_dragState.offset <= _maxDragOffset) {
       _dragState.updateOffset(details.delta.dy, _maxDragOffset);
-      setState(() {});
     }
+    setState(() {});
   }
 
   void _onPanEnd(DragEndDetails details) {
     if (_dragState.offset >= _dismissThreshold) {
       _dragState.setOffset(_dismissThreshold);
+
+      isPiPMode = true;
     } else {
       _dragState.reset();
     }
@@ -271,25 +299,42 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       animation: _videoPlayerAnimationController,
       builder: (context, child) {
         final shouldMaintainDragOffset = _dragState.offset > _dismissThreshold;
+        // Calculate offset based on mode
+        Offset translationOffset;
 
-        return Transform.translate(
-          offset: Offset(
+        if (isPiPMode) {
+          // In PiP mode, use pipX and pipY for free movement
+          translationOffset = Offset(pipX, pipY);
+        } else {
+          // In normal mode, use existing drag logic (vertical only)
+          translationOffset = Offset(
             0,
             _dragState.isDragging || shouldMaintainDragOffset
                 ? _dragState.offset
                 : _dragState.offset *
                     (1 - _videoPlayerAnimationController.value),
-          ),
+          );
+        }
+        print(translationOffset);
+        return Transform.translate(
+          offset: translationOffset,
           child: _VideoPlayerOverlay(
             video: _selectedVideo,
+            stateReset: () {
+              isPiPMode = false;
+              _dragState.reset();
+              setState(() {});
+            },
             dragState: _dragState,
             isToggled: _toggled,
+
             onPanStart: _onPanStart,
             onPanUpdate: _onPanUpdate,
             onPanEnd: _onPanEnd,
             onClose: _closeVideoPlayer,
             dismissThreshold: _dismissThreshold,
             maxDragOffset: _maxDragOffset,
+            isPiPMode: isPiPMode,
           ),
         );
       },
@@ -616,14 +661,16 @@ class _VideoPlayerOverlay extends StatelessWidget {
   final VideoModel video;
   final _DragState dragState;
   final bool isToggled;
+  bool isPiPMode;
   final void Function(DragStartDetails) onPanStart;
   final void Function(DragUpdateDetails) onPanUpdate;
   final void Function(DragEndDetails) onPanEnd;
+  final void Function() stateReset;
   final VoidCallback onClose;
   final double dismissThreshold;
   final double maxDragOffset;
 
-  const _VideoPlayerOverlay({
+  _VideoPlayerOverlay({
     required this.video,
     required this.dragState,
     required this.isToggled,
@@ -633,6 +680,8 @@ class _VideoPlayerOverlay extends StatelessWidget {
     required this.onClose,
     required this.dismissThreshold,
     required this.maxDragOffset,
+    required this.isPiPMode,
+    required this.stateReset,
   });
 
   @override
@@ -645,6 +694,7 @@ class _VideoPlayerOverlay extends StatelessWidget {
           onPanUpdate: onPanUpdate,
           onPanEnd: onPanEnd,
           isToggled: isToggled,
+          isPiPMode: isPiPMode,
           isDragging: dragState.isDragging,
         ),
         if (!dragState.isDragging)
@@ -690,6 +740,32 @@ class _VideoPlayerOverlay extends StatelessWidget {
                   ),
                   style: const TextStyle(color: Colors.white, fontSize: 12),
                 ),
+              ),
+            ),
+          ),
+        if (isPiPMode)
+          Positioned(
+            top: 100,
+            left: 160,
+            child: GestureDetector(
+              onTap: stateReset,
+              child: Container(
+                color: Colors.transparent,
+                width: MediaQuery.of(context).size.width / 5.5,
+                height: MediaQuery.of(context).size.height / 12,
+              ),
+            ),
+          ),
+        if (isPiPMode)
+          Positioned(
+            top: 100,
+            right: 20,
+            child: GestureDetector(
+              onTap: stateReset,
+              child: Container(
+                color: Colors.transparent,
+                width: MediaQuery.of(context).size.width / 5.5,
+                height: MediaQuery.of(context).size.height / 12,
               ),
             ),
           ),
