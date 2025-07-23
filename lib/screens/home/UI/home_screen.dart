@@ -30,8 +30,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     'New to you',
   ];
 
-  static const double _dismissThreshold = 400.0;
-  static const double _maxDragOffset = 400.0;
+  static const double _dismissThreshold = 390.9505208333336;
+  static const double _maxDragOffset = 390.9505208333336;
 
   // Controllers
   late final ScrollController _scrollController;
@@ -175,6 +175,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       // pipX = pipX.clamp(0 - pipWidth + 50, screenWidth - 50); // Allow partial off-screen
       // pipY = pipY.clamp(0, screenHeight - pipHeight - 50);
 
+      // Limit horizontal movement: from -pipWidth (left edge) to 0 (right edge)
+      pipX = pipX.clamp(-pipWidth - 75, 0);
+
+      // Limit vertical movement: from 0 (top) to screenHeight - pipHeight (bottom)
+      pipY = pipY.clamp(-120, 390);
+
+      print("$pipX pipx");
+      print("$pipY pipy");
+
       setState(() {});
       return;
     }
@@ -186,9 +195,39 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _onPanEnd(DragEndDetails details) {
+    if (isPiPMode) {
+      // Snap to nearest corner
+      final corners = {
+        'topRight': Offset(-5, -115.36425781250001),
+        'bottomLeft': Offset(-140.30205420291784, 390.9505208333336),
+        'topLeft': Offset(-140.30205420291784, -115.36425781250001),
+        'bottomRight': Offset(-5, 390.9505208333336),
+      };
+
+      final current = Offset(pipX, pipY);
+      Offset closestCorner = corners.values.first;
+      double minDistance = double.infinity;
+
+      for (var corner in corners.values) {
+        final distance = (current - corner).distance;
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestCorner = corner;
+        }
+      }
+
+      pipX = closestCorner.dx;
+      pipY = closestCorner.dy;
+      print("$pipX pipx");
+      print("$pipY pipy");
+    }
     if (_dragState.offset >= _dismissThreshold) {
       _dragState.setOffset(_dismissThreshold);
 
+      if (!isPiPMode) {
+        pipX = 0;
+        pipY = _maxDragOffset;
+      }
       isPiPMode = true;
     } else {
       _dragState.reset();
@@ -221,10 +260,31 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _shouldShowAppBar() ? _buildAppBar() : null,
-      body: BlocConsumer<VideoBloc, VideoState>(
-        listener: _handleBlocStateChanges,
-        builder: _buildContent,
+      body: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height * 0.1,
+              child: _buildAppBar(),
+            ),
+          ),
+          Positioned(
+            top:
+                _shouldShowAppBar()
+                    ? MediaQuery.of(context).size.height * 0.1
+                    : 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: BlocConsumer<VideoBloc, VideoState>(
+              listener: _handleBlocStateChanges,
+              builder: _buildContent,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -696,6 +756,7 @@ class _VideoPlayerOverlay extends StatelessWidget {
           isToggled: isToggled,
           isPiPMode: isPiPMode,
           isDragging: dragState.isDragging,
+          resetState: onClose,
         ),
         if (!dragState.isDragging)
           Positioned(
@@ -717,40 +778,15 @@ class _VideoPlayerOverlay extends StatelessWidget {
               ),
             ),
           ),
-        if (dragState.offset > 0)
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 60,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  _getDragText(
-                    dragState.offset,
-                    dismissThreshold,
-                    maxDragOffset,
-                  ),
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
-                ),
-              ),
-            ),
-          ),
+
         if (isPiPMode)
           Positioned(
-            top: 100,
+            top: 130,
             left: 160,
             child: GestureDetector(
               onTap: stateReset,
               child: Container(
-                color: Colors.transparent,
+                color: const Color.fromARGB(0, 255, 0, 0),
                 width: MediaQuery.of(context).size.width / 5.5,
                 height: MediaQuery.of(context).size.height / 12,
               ),
@@ -763,23 +799,13 @@ class _VideoPlayerOverlay extends StatelessWidget {
             child: GestureDetector(
               onTap: stateReset,
               child: Container(
-                color: Colors.transparent,
+                color: const Color.fromARGB(0, 255, 0, 0),
                 width: MediaQuery.of(context).size.width / 5.5,
-                height: MediaQuery.of(context).size.height / 12,
+                height: MediaQuery.of(context).size.height / 8.1,
               ),
             ),
           ),
       ],
     );
-  }
-
-  String _getDragText(
-    double offset,
-    double dismissThreshold,
-    double maxDragOffset,
-  ) {
-    if (offset > dismissThreshold) return 'Release to close';
-    if (offset >= maxDragOffset) return 'Tap to expand';
-    return 'Drag down to minimize';
   }
 }

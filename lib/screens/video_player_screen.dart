@@ -14,6 +14,7 @@ class VideoPlayerScreen extends StatefulWidget {
   final GestureDragUpdateCallback? onPanUpdate;
   final GestureDragStartCallback? onPanStart;
   final GestureDragEndCallback? onPanEnd;
+  final Function()? resetState;
 
   const VideoPlayerScreen({
     super.key,
@@ -25,6 +26,7 @@ class VideoPlayerScreen extends StatefulWidget {
     this.isToggled,
     this.isDragging,
     this.isPiPMode,
+    this.resetState,
   });
 
   @override
@@ -141,7 +143,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     double calculateScale() {
       // If toggle is false, return minimized scale (half size)
       if (widget.isPiPMode == true) {
-        _opacity = 1;
+        _opacity = 0;
         return 0.6; // or 0.6 if you want the same as your clamp's min
       }
 
@@ -197,6 +199,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       onPanEnd: (details) {
         widget.onPanEnd!(details);
         if (_cumulativeDrag >= 400) {
+          print("edged");
           _cumulativeDrag = 400;
         } else {
           setState(() {
@@ -214,16 +217,37 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
             Positioned(
               // Position to the right edge
               right: 0,
-              left: null,
               bottom: 0,
               width: playerWidth,
               height: playerHeight,
               child: YoutubePlayerBuilder(
                 player: YoutubePlayer(
                   controller: _youtubePlayerController,
-                  showVideoProgressIndicator: _isDragging ? true : false,
+                  showVideoProgressIndicator:
+                      !(widget.isPiPMode == true || _isDragging),
                   progressIndicatorColor: Colors.red,
+                  topActions:
+                      (widget.isPiPMode == true || _isDragging)
+                          ? <Widget>[
+                            IconButton(
+                              onPressed: widget.resetState,
+                              icon: Icon(Icons.close),
+                            ),
+                          ]
+                          : [],
+                  bottomActions:
+                      (widget.isPiPMode == true || _isDragging)
+                          ? [] // Hide all bottom controls
+                          : [
+                            const SizedBox(width: 14.0),
+                            CurrentPosition(),
+                            ProgressBar(isExpanded: true),
+                            RemainingDuration(),
+                            PlaybackSpeedButton(),
+                            FullScreenButton(),
+                          ],
                 ),
+
                 builder:
                     (context, player) => SizedBox(
                       width: double.infinity,
